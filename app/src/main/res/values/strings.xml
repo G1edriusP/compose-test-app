@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Moovi</string>
+
+    <!--  Bottom bar  -->
+    <string name="bottom.bar.home">Home</string>
+    <string name="bottom.bar.info">Info</string>
 </resources>
