@@ -12,10 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -53,11 +50,19 @@ class MainActivity : ComponentActivity() {
                 val shouldShowBottomBar = navController.currentBackStackEntryAsState().value
                     ?.destination?.route in routes
 
-                Scaffold(bottomBar = {
-                    if (shouldShowBottomBar) {
-                        BottomBar(navController = navController)
-                    }
-                }) { paddingValues ->
+                Scaffold(
+                    topBar = {
+                        Header(
+                            navController = navController, currentRoute = navController
+                                .currentDestination?.route
+                                .toString()
+                        )
+                    },
+                    bottomBar = {
+                        if (shouldShowBottomBar) {
+                            BottomBar(navController = navController)
+                        }
+                    }) { paddingValues ->
                     DestinationsNavHost(
                         navGraph = NavGraphs.root,
                         navController = navController,
@@ -70,7 +75,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Header(navigator: DestinationsNavigator) {
+fun Header(navController: NavController, currentRoute: String) {
+    val backButtonScreens = listOf("settings_screen")
+    val cogButtonScreens = listOf("home_screen", "info_screen")
+
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -80,12 +88,25 @@ fun Header(navigator: DestinationsNavigator) {
             .background(Color.White)
             .padding(16.dp)
     ) {
-        Text(
-            text = "Moovi", fontSize = 24.sp, fontWeight = FontWeight.Bold,
-            letterSpacing = 2.sp
-        )
-        Icon(imageVector = Icons.Filled.Settings, contentDescription = null, modifier = Modifier
-            .clickable { navigator.navigate(SettingsScreenDestination()) })
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (currentRoute in backButtonScreens) {
+                Icon(imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .clickable { navController.navigateUp() })
+                Spacer(modifier = Modifier.size(16.dp))
+            }
+            Text(
+                text = stringResource(id = R.string.app_name),
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 2.sp
+            )
+        }
+        if (currentRoute in cogButtonScreens) {
+            Icon(imageVector = Icons.Filled.Settings, contentDescription = null, modifier = Modifier
+                .clickable { navController.navigate(SettingsScreenDestination()) })
+        }
     }
 }
 
@@ -116,13 +137,10 @@ fun HomeScreen(navigator: DestinationsNavigator) {
     }
     Box(
         modifier = Modifier
-            .fillMaxHeight()
+            .fillMaxSize()
             .background(Color.White)
     ) {
-        Column {
-            Header(navigator)
-            NumbersList(numbers = numbers)
-        }
+        NumbersList(numbers = numbers)
         FloatingActionButton(
             onClick = {
                 numbers.add((0..59).random())
@@ -141,29 +159,24 @@ fun HomeScreen(navigator: DestinationsNavigator) {
 @Destination
 @Composable
 fun InfoScreen(navigator: DestinationsNavigator) {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        Text(text = "Info screen")
+        Text(text = "Info screen", modifier = Modifier.align(Alignment.Center))
     }
 }
 
 @Destination
 @Composable
-fun SettingsScreen(navigator: DestinationsNavigator) {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+fun SettingsScreen(navigator: DestinationsNavigator, navController: NavController) {
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-
     ) {
-        Text(text = "Settings screen")
+        Text(text = "Settings screen", modifier = Modifier.align(Alignment.Center))
     }
 }
 
